@@ -1,5 +1,4 @@
 import random
-import re
 import lightbulb
 from lightbulb import commands
 
