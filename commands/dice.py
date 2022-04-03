@@ -6,7 +6,7 @@ from lightbulb import commands
 # These two are the same type, but are optional. We can provide a
 # default value simply by using the `default` kwarg.
 @lightbulb.option("dice", "The dice to be rolled, will roll a single d20 if no value provided.", str, default='1d20')
-
+# @lightbulb.option("options", "The options to modify the type of dice roll. a for advantage, d for disadvantage, 1, to reroll 1s, and 12 to reroll 1s and 2s.", str, default='')
 @lightbulb.command("roll", "Roll one or more dice.")
 # Define the types of command that this function will implement
 @lightbulb.implements(commands.SlashCommand)
@@ -21,6 +21,7 @@ async def dice(ctx: lightbulb.context.Context) -> None:
         diceList, bonusList = parseDice(dice)
     except ValueError as e:
         await ctx.respond("Invalid dice format.")
+        return
 
     rolls, total = rollDice(diceList, bonusList)
 
@@ -32,6 +33,8 @@ async def dice(ctx: lightbulb.context.Context) -> None:
 
     if len(response) > 2000:
         response = f"Dice body too long. Total roll: {total}."
+
+    response = f"Rolling {dice}\n{response}"
 
     await ctx.respond(response)
 

@@ -1,4 +1,3 @@
-hikari[speedups]~=2.0.0.dev101; python_version < "3.10"
 hikari~=2.0.0.dev101; python_version == "3.10"
 hikari-lightbulb~=2.0.0
 python-dotenv~=0.20.0
