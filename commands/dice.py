@@ -5,7 +5,7 @@ from lightbulb import commands
 
 # These two are the same type, but are optional. We can provide a
 # default value simply by using the `default` kwarg.
-@lightbulb.option("dice", "A fixed number to add to the total roll.", str, default='1d20')
+@lightbulb.option("dice", "The dice to be rolled, will roll a single d20 if no value provided.", str, default='1d20')
 
 @lightbulb.command("roll", "Roll one or more dice.")
 # Define the types of command that this function will implement
@@ -34,17 +34,6 @@ async def dice(ctx: lightbulb.context.Context) -> None:
         response = f"Dice body too long. Total roll: {total}."
 
     await ctx.respond(response)
-
-    # rolls = [random.randint(1, sides) for _ in range(number)]
-
-    # To send a message, use ctx.respond. Using kwargs, you can make the
-    # bot reply to a message (when not sent from a slash command
-    # invocation), allow mentions, make the message ephemeral, etc.
-    # await ctx.respond(
-    #     " + ".join(f"{r}" for r in rolls)
-    #     + (f" + {bonus} (bonus)" if bonus else "")
-    #     + f" = **{sum(rolls) + bonus:,}**"
-    # )
 
 def load(bot: lightbulb.BotApp) -> None:
     bot.command(dice)
