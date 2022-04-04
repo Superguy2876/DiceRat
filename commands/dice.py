@@ -44,7 +44,19 @@ async def dice(ctx: lightbulb.context.Context) -> None:
     if len(response) > 2000:
         response = f"Dice body too long. Total roll: {total}."
 
-    response = f"Rolling {dice}\n{response}"
+    responseModifier = ""
+    if optionsList[0]:
+        responseModifier += " adv"
+    elif optionsList[1]:
+        responseModifier += " dis"
+    
+    for _ in optionsList:
+        if type(_) == int:
+            responseModifier += f" {_}s"
+            
+
+
+    response = f"Rolling {dice}{responseModifier}\n{response}"
 
     await ctx.respond(response)
 
