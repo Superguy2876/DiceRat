@@ -6,7 +6,7 @@ from lightbulb import commands
 # These two are the same type, but are optional. We can provide a
 # default value simply by using the `default` kwarg.
 @lightbulb.option("dice", "The dice to be rolled, will roll a single d20 if no value provided.", str, default='1d20')
-@lightbulb.option("options", "The options to modify the type of dice roll. a for advantage, d for disadvantage, 1, to reroll 1s, and 12 to reroll 1s and 2s.", str, default='')
+@lightbulb.option("options", "The options to modify the type of dice roll.", str, default='')
 @lightbulb.command("roll", "Roll one or more dice.")
 # Define the types of command that this function will implement
 @lightbulb.implements(commands.SlashCommand)
@@ -49,7 +49,7 @@ async def dice(ctx: lightbulb.context.Context) -> None:
     await ctx.respond(response)
 
 @lightbulb.option("modifier", "The modifier to be added to the roll.", int, default=0)
-@lightbulb.option("options", "The options to modify the type of dice roll. a for advantage, d for disadvantage, 1 to reroll 1s", str, default='')
+@lightbulb.option("options", "The options to modify the type of dice roll.", str, default='')
 @lightbulb.command("r20", "Roll a d20 with modifiers.")
 @lightbulb.implements(commands.SlashCommand)
 async def r20(ctx: lightbulb.context.Context) -> None:
