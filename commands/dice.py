@@ -56,24 +56,35 @@ async def r20(ctx: lightbulb.context.Context) -> None:
     modifier = ctx.options.modifier
     options = ctx.options.options
 
-    optionsList = ['a' in options, 'd' in options]
-    if '1' in options:
-        optionsList.append(1)
+    if 'a' in options and 'd' in options:
+        options = ''
 
-    rolls, total = rollDice([(1, 20)], [modifier], optionsList)
+    
+    rolls = [random.randint(1, 20), random.randint(1, 20)]
+    
+    if 'a' in options:
+        roll = max(rolls)
+        discardedRoll = min(rolls)
+        optionsText = " with advantage"
+        rollText = f"({roll}, ~~{discardedRoll}~~)"
+    
+    elif 'd' in options:
+        roll = min(rolls)
+        discardedRoll = max(rolls)
+        optionsText = " with disadvantage"
+        rollText = f"({roll}, ~~{discardedRoll}~~)"
 
-    response = f" {' + '.join([str(roll[0])+':'+str(roll[1]) for roll in rolls])}"
-    if len(bonusList) > 0:
-        response += f" + {' + '.join([str(bonus) for bonus in bonusList])}"
+    else:
+        roll = roll[0]
+        discardedRoll = 0
+        optionsText = ""
+        rollText = f"({roll})"
+    
+    responseHead = f"Rolling a d20{optionsText} + {modifier}:\n"
+    responseBody = f"{rollText} + {modifier} = {roll + modifier}"
 
-    response += f" = {total}"
+    ctx.respond(responseHead + responseBody)
 
-    if len(response) > 2000:
-        response = f"Dice body too long. Total roll: {total}."
-
-    response = f"Rolling 1d20\n{response}"
-
-    await ctx.respond(response)
 
 def load(bot: lightbulb.BotApp) -> None:
     bot.command(dice)
@@ -161,3 +172,7 @@ def rollDice(diceList, bonusList, optionsList=[]):
     
     total = sum([sum(roll[1]) for roll in rolls]) + sum(bonusList)
     return rolls, total
+
+# this function will roll a d20 with modifiers, if a or d is in the options, it will roll twice and take the highest or lowest roll respectively
+# if 1 is in the options, it will reroll 1's
+# it will return all rolls, and the first roll in the list will be the roll used to calculate the total
