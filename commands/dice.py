@@ -83,7 +83,7 @@ async def r20(ctx: lightbulb.context.Context) -> None:
     responseHead = f"Rolling a d20{optionsText} + {modifier}:\n"
     responseBody = f"{rollText} + {modifier} = {roll + modifier}"
 
-    ctx.respond(responseHead + responseBody)
+    await ctx.respond(responseHead + responseBody)
 
 
 def load(bot: lightbulb.BotApp) -> None:
