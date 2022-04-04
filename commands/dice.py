@@ -75,7 +75,7 @@ async def r20(ctx: lightbulb.context.Context) -> None:
         rollText = f"({roll}, ~~{discardedRoll}~~)"
 
     else:
-        roll = roll[0]
+        roll = rolls[0]
         discardedRoll = 0
         optionsText = ""
         rollText = f"({roll})"
