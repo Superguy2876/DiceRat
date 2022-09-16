@@ -1,4 +1,5 @@
 import random
+from urllib import response
 import lightbulb
 from lightbulb import commands
 
@@ -60,6 +61,36 @@ async def dice(ctx: lightbulb.context.Context) -> None:
 
     await ctx.respond(response)
 
+@lightbulb.option("coins", "The number of coins to flip.", int, default=1)
+@lightbulb.command("flip", "Flip some coins.")
+@lightbulb.implements(commands.SlashCommand)
+async def flip(ctx: lightbulb.context.Context) -> None:
+    coins = ctx.options.coins
+    if coins <= 0:
+        await ctx.respond("Invalid number of coins.")
+        return
+    
+    flipList = []
+    heads = 0
+    tails = 0
+    for _ in range(coins):
+        flipList.append(random.choice(["Heads", "Tails"]))
+        if flipList[-1] == "Heads":
+            heads += 1
+        else:    
+            tails += 1
+    
+    response = f"Flipping {coins} coins.\n"
+    response += f"Flipped {heads} heads and {tails} tails.\n"
+    response += f"{', '.join(flipList)}"
+
+    if len(response) > 2000:
+        response = f"Coin flip body too long.\nFlipping {coins} coins.\n Total Heads: {heads}, Total Tails: {tails}."
+    
+    await ctx.respond(response)
+
+
+
 @lightbulb.option("modifier", "The modifier to be added to the roll.", int, default=0)
 @lightbulb.option("options", "The options to modify the type of dice roll.", str, default='')
 @lightbulb.command("r20", "Roll a d20 with modifiers.")
@@ -110,8 +141,8 @@ def parseDice(dice):
     diceList = []
     bonusList = []
     temp = ""
-    digits = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0"]
-    whitespace = [" ", "\t", "\n"]
+    digits = ("1", "2", "3", "4", "5", "6", "7", "8", "9", "0")
+    whitespace = (" ", "\t", "\n")
 
     for char in dice:
         if char in whitespace:
