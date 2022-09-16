@@ -132,10 +132,12 @@ async def r20(ctx: lightbulb.context.Context) -> None:
 def load(bot: lightbulb.BotApp) -> None:
     bot.command(dice)
     bot.command(r20)
+    bot.command(flip)
 
 def unload(bot: lightbulb.BotApp) -> None:
     bot.remove_command(bot.get_slash_command("dice"))
     bot.remove_command(bot.get_slash_command("r20"))
+    bot.remove_command(bot.get_slash_command("flip"))
 
 def parseDice(dice):
     diceList = []
