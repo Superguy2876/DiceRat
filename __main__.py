@@ -21,6 +21,11 @@ def create_bot() -> lightbulb.BotApp:
 
     # Load all extensions.
     bot.load_extensions_from("./DiceRat/commands")
+    command_list = bot.slash_commands
+    for command in command_list:
+        print(command)
+        print('\n'.join(dir(command_list[command])))
+    print(command_list)
 
     return bot
 

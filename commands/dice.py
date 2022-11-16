@@ -129,15 +129,123 @@ async def r20(ctx: lightbulb.context.Context) -> None:
     await ctx.respond(responseHead + responseBody)
 
 
+# tarot card bot function
+@lightbulb.option("number", "The number of cards to pull.", int, default=1)
+@lightbulb.command("tarot", "Pull a tarot card.")
+@lightbulb.implements(commands.SlashCommand)
+async def tarot(ctx: lightbulb.context.Context) -> None:
+    number = ctx.options.number
+    if number <= 0:
+        await ctx.respond("Invalid number of cards.")
+        return
+
+    deck = [
+        "The Fool",
+        "The Magician",
+        "The High Priestess",
+        "The Empress",
+        "The Emperor",
+        "The Hierophant",
+        "The Lovers",
+        "The Chariot",
+        "Strength",
+        "The Hermit",
+        "Wheel of Fortune",
+        "Justice",
+        "The Hanged Man",
+        "Death",
+        "Temperance",
+        "The Devil",
+        "The Tower",
+        "The Star",
+        "The Moon",
+        "The Sun",
+        "Judgement",
+        "The World"
+    ]
+
+    cards = []
+
+    try:
+        cards = random.sample(deck, k=number)
+    except ValueError:
+        await ctx.respond("Invalid number of cards.")
+        return
+
+    response = f"Pulling {number} cards.\n"
+    response += f"{'\n'.join(cards)}"
+
+    await ctx.respond(response)
+
+# deck of many things bot function
+@lightbulb.option("number", "The number of cards to pull.", int, default=1)
+@lightbulb.command("deckofmany", "Pull a card from the deck of many things.")
+@lightbulb.implements(commands.SlashCommand)
+async def deckofmany(ctx: lightbulb.context.Context) -> None:
+    number = ctx.options.number
+
+    deck = [
+        "Vizier",
+        "Sun",
+        "Moon",
+        "Star",
+        "Comet",
+        "The Fates",
+        "Throne",
+        "Key",
+        "Knight",
+        "Gem",
+        "Talons",
+        "The Void",
+        "Flames",
+        "Skull",
+        "Idiot",
+        "Donjon",
+        "Ruin",
+        "Euryale",
+        "Rogue",
+        "Balance",
+        "Fool",
+        "Jester"
+    ]
+
+    cards = []
+
+    try:
+        cards = random.sample(deck, k=number)
+    except ValueError:
+        await ctx.respond("Invalid number of cards.")
+        return
+    
+
+    response = f"Pulling {number} cards.\n"
+    response += f"{'\n'.join(cards)}"
+
+    await ctx.respond(response)
+
+# Pulls a number cards from a deck of cards
+def pullCards(deck, number):
+    cards = []
+    if number > len(deck):
+        raise ValueError("Not enough cards in deck.")
+    for _ in range(number):
+        cards.append(deck.pop())
+    return cards
+
+
 def load(bot: lightbulb.BotApp) -> None:
     bot.command(dice)
     bot.command(r20)
     bot.command(flip)
+    bot.command(tarot)
+    bot.command(deckofmany)
 
 def unload(bot: lightbulb.BotApp) -> None:
     bot.remove_command(bot.get_slash_command("dice"))
     bot.remove_command(bot.get_slash_command("r20"))
     bot.remove_command(bot.get_slash_command("flip"))
+    bot.remove_command(bot.get_slash_command("tarot"))
+    bot.remove_command(bot.get_slash_command("deckofmany"))
 
 def parseDice(dice):
     diceList = []
@@ -218,6 +326,4 @@ def rollDice(diceList, bonusList, optionsList=[]):
     total = sum([sum(roll[1]) for roll in rolls]) + sum(bonusList)
     return rolls, total
 
-# this function will roll a d20 with modifiers, if a or d is in the options, it will roll twice and take the highest or lowest roll respectively
-# if 1 is in the options, it will reroll 1's
-# it will return all rolls, and the first roll in the list will be the roll used to calculate the total
+
