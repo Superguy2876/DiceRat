@@ -172,8 +172,9 @@ async def tarot(ctx: lightbulb.context.Context) -> None:
         await ctx.respond("Invalid number of cards.")
         return
 
+    new_line = "\n"
     response = f"Pulling {number} cards.\n"
-    response += f"{'\n'.join(cards)}"
+    response += f"{new_line.join(cards)}"
 
     await ctx.respond(response)
 
@@ -217,9 +218,9 @@ async def deckofmany(ctx: lightbulb.context.Context) -> None:
         await ctx.respond("Invalid number of cards.")
         return
     
-
+    new_line = "\n"
     response = f"Pulling {number} cards.\n"
-    response += f"{'\n'.join(cards)}"
+    response += f"{new_line.join(cards)}"
 
     await ctx.respond(response)
 
