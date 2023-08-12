@@ -32,7 +32,6 @@ async def dice(ctx: lightbulb.context.Context) -> None:
         key = f"{guild_id}:{user_id}:{label}"
 
         if not r.exists(key):
-            ctx.command.default_ephemeral = True
             await ctx.respond(f"Error: No dice string saved to label {label}")
             return
 
@@ -42,8 +41,7 @@ async def dice(ctx: lightbulb.context.Context) -> None:
     try:
         dice_pool = DicePool(dice)
     except Exception as e:
-        # send ephemeral error message
-        ctx.command.default_ephemeral = True
+        # send error message
         await ctx.respond(f"Error: {e}, Invalid Dice String")
         return
     dice_pool.roll()
@@ -85,7 +83,7 @@ async def dice(ctx: lightbulb.context.Context) -> None:
             dice_str_list.append(f"{item['quantity']}d{item['sides']}:({', '.join(str(x) for x in item['values'])} : {item['total']})")
         else:
             dice_str_list.append(str(item))
-        response += f"{'+ '.join(dice_str_list)}"
+    response += f"{'+ '.join(dice_str_list)}"
     
     response += f" = {dice_pool.total}"
 
