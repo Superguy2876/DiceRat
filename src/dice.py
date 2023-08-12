@@ -120,11 +120,13 @@ class DicePool:
         for item in self.dice_constants:
             if isinstance(item, Dice):
                 item.roll()
+        self.total = sum(self.dice_constants)
     
     def reroll(self, func: callable):
         for item in self.dice_constants:
             if isinstance(item, Dice):
                 item.reroll(func)
+        self.total = sum(self.dice_constants)
 
     def look(self):
         return [{'sides': item.sides, 'quantity': item.quantity, 'values':item.values, 'total':item.total} if isinstance(item, Dice) else item for item in self.dice_constants]

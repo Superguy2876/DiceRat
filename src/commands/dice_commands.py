@@ -85,7 +85,7 @@ async def dice(ctx: lightbulb.context.Context) -> None:
             dice_str_list.append(f"{item['quantity']}d{item['sides']}:({', '.join(str(x) for x in item['values'])} : {item['total']})")
         else:
             dice_str_list.append(str(item))
-        response += f"{'+ '.join(dice_str_list)}\n"
+        response += f"{'+ '.join(dice_str_list)}"
     
     response += f" = {dice_pool.total}"
 
@@ -104,6 +104,7 @@ async def create_label(ctx: lightbulb.context.Context) -> None:
         dice_pool = DicePool(ctx.options.dice)
     except Exception as e:
         # send ephemeral error message
+        ctx.command.default_ephemeral = True
         await ctx.respond(f"Error: {e}, Invalid Dice String")
         return
 
