@@ -1,0 +1,35 @@
+# .dockerignore
+
+# Ignore the virtual environment directory
+env
+
+# Ignore vscode directory
+.vscode
+
+# Ignore Python cache files and directories
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+**/__pycache__
+
+# Ignore git directories
+.git
+.gitignore
+
+# Ignore logs
+logs
+
+# Ignore data directories
+data
+
+# Ignore test directories
+tests
+
+# Ignore configuration files
+*.cfg
+*.ini
+*.json
+
+# Ignore all markdown files
+*.md
