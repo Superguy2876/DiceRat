@@ -76,9 +76,10 @@ async def dice(ctx: lightbulb.context.Context) -> None:
         options_string += f'Rerolling {reroll_value} or lower'
     # Create a response string
     response = f"Rolling {dice}, {options_string}\n"
-
+    
+    dice_str_list = []
     for item in dice_pool.look():
-        dice_str_list = []
+        
         if isinstance(item, dict):
             dice_str_list.append(f"{item['quantity']}d{item['sides']}:({', '.join(str(x) for x in item['values'])} : {item['total']})")
         else:
