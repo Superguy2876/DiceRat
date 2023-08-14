@@ -1,6 +1,7 @@
 import random
 from urllib import response
 import lightbulb
+import hikari
 from lightbulb import commands
 import redis
 import dyce
@@ -43,7 +44,7 @@ async def deckofmany(ctx: lightbulb.context.Context) -> None:
     try:
         cards = random.sample(deck, k=number)
     except ValueError:
-        await ctx.respond("Invalid number of cards.")
+        await ctx.respond("Invalid number of cards.", flags=hikari.MessageFlag.EPHEMERAL)
         return
     
     new_line = "\n"
@@ -122,7 +123,7 @@ async def domtex(ctx: lightbulb.context.Context) -> None:
     try:
         cards = random.sample(deck, k=number)
     except ValueError:
-        await ctx.respond("Invalid number of cards.")
+        await ctx.respond("Invalid number of cards.", flags=hikari.MessageFlag.EPHEMERAL)
         return
     
     new_line = "\n"
@@ -138,7 +139,7 @@ async def domtex(ctx: lightbulb.context.Context) -> None:
 async def tarot(ctx: lightbulb.context.Context) -> None:
     number = ctx.options.number
     if number <= 0:
-        await ctx.respond("Invalid number of cards.")
+        await ctx.respond("Invalid number of cards.", flags=hikari.MessageFlag.EPHEMERAL)
         return
 
     deck = [
@@ -171,7 +172,7 @@ async def tarot(ctx: lightbulb.context.Context) -> None:
     try:
         cards = random.sample(deck, k=number)
     except ValueError:
-        await ctx.respond("Invalid number of cards.")
+        await ctx.respond("Invalid number of cards.", flags=hikari.MessageFlag.EPHEMERAL)
         return
 
     new_line = "\n"
@@ -230,7 +231,7 @@ async def draw_cards(ctx: lightbulb.context.Context):
         user_id = ctx.author.id
         # check if deck exists
         if not r.exists(f"deck:{guild_id}:{user_id}:{name}"):
-            await ctx.respond(f"Deck {name} does not exist.")
+            await ctx.respond(f"Deck {name} does not exist.", flags=hikari.MessageFlag.EPHEMERAL)
             return
         # get deck
         card_string = r.get(f"deck:{guild_id}:{user_id}:{name}")
@@ -239,13 +240,10 @@ async def draw_cards(ctx: lightbulb.context.Context):
     # remove empty strings, and leading and trailing spaces
     card_list = [card.strip() for card in card_list if card.strip()]
 
-    
-
-    
     try:
         cards = random.sample(card_list, k=number)
     except ValueError:
-        await ctx.respond("Invalid number of cards.")
+        await ctx.respond("Invalid number of cards.", flags=hikari.MessageFlag.EPHEMERAL)
         return
 
     new_line = "\n"

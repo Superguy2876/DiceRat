@@ -5,8 +5,9 @@ import hikari
 import os
 from lightbulb import commands
 import redis
-import dyce
+from dyce import H
 from ..dice import DicePool, Dice
+import uuid
 
 
 
@@ -33,7 +34,7 @@ async def dice(ctx: lightbulb.context.Context) -> None:
         key = f"{guild_id}:{user_id}:{label}"
 
         if not r.exists(key):
-            await ctx.respond(f"Error: No dice string saved to label {label}")
+            await ctx.respond(f"Error: No dice string saved to label {label}",  flags=hikari.MessageFlag.EPHEMERAL)
             return
 
         dice = r.get(key)
@@ -43,7 +44,7 @@ async def dice(ctx: lightbulb.context.Context) -> None:
         dice_pool = DicePool(dice)
     except Exception as e:
         # send error message
-        await ctx.respond(f"Error: {e}, Invalid Dice String")
+        await ctx.respond(f"Error: {e}, Invalid Dice String",  flags=hikari.MessageFlag.EPHEMERAL)
         return
     dice_pool.roll()
 
@@ -91,9 +92,9 @@ async def dice(ctx: lightbulb.context.Context) -> None:
 
     if len(response) > 2000:
         # create txt file and put response in it
-        filename = f"{str(ctx.author.id)}_response.txt"
-        with open(filename, 'w') as f:
-            f.write(response)
+        filename = f"{uuid.uuid4()}_response.txt"
+        with open(filename, 'w') as wf:
+            wf.write(response)
         
         # create new response, attach file to it, and send
         response = f"Dice roll body too long. See text file for full roll.\nRolling {dice}, {options_string}\nTotal: {dice_pool.total}"
@@ -143,7 +144,7 @@ async def create_label(ctx: lightbulb.context.Context) -> None:
 async def flip(ctx: lightbulb.context.Context) -> None:
     coins = ctx.options.coins
     if coins <= 0:
-        await ctx.respond("Invalid number of coins.")
+        await ctx.respond("Invalid number of coins.", flags=hikari.MessageFlag.EPHEMERAL)
         return
     
     flipList = []
@@ -161,7 +162,15 @@ async def flip(ctx: lightbulb.context.Context) -> None:
     response += f"{', '.join(flipList)}"
 
     if len(response) > 2000:
-        response = f"Coin flip body too long.\nFlipping {coins} coins.\n Total Heads: {heads}, Total Tails: {tails}."
+        filename = f"{uuid.uuid4()}_response.txt"
+        with open(filename, 'w') as wf:
+            wf.write(response)
+
+        response = f"Coin flip body too long. See text file for full coin flip results.\nFlipping {coins} coins.\n Total Heads: {heads}, Total Tails: {tails}."
+        file = hikari.File(filename)
+        await ctx.respond(response, attachment=file)
+        os.remove(filename)
+        return
     
     await ctx.respond(response)
 
@@ -204,7 +213,82 @@ async def r20(ctx: lightbulb.context.Context) -> None:
 
     await ctx.respond(responseHead + responseBody)
 
+# command to test dice histograms using dyce.
+@lightbulb.option("label", "The label for the dice string.", str, default=None)
+@lightbulb.option("dice", "The dice to be rolled, will roll a single d20 if no value provided.", str, default='1d20')
+@lightbulb.command("histogram", "test command")
+@lightbulb.implements(commands.SlashCommand)
+async def histogram(ctx: lightbulb.context.Context) -> None:
+    # Extract the options from the context
+    dice = ctx.options.dice
+    label = ctx.options.label
 
+    # get dice from label if label is provided
+    if label is not None:
+        # open redis connection
+        r = redis.Redis(connection_pool=ctx.bot.redis_pool)
+        # get user id
+        user_id = ctx.author.id
+        # get guild id
+        guild_id = ctx.guild_id
+        # create key
+        key = f"{guild_id}:{user_id}:{label}"
+        # check if key exists
+        if not r.exists(key):
+            # send error message
+            await ctx.respond(f"Error: Label {label} does not exist.", hikari.MessageFlag.EPHEMERAL)
+            return
+        # get dice string
+        dice = r.get(key)
+    
+
+    try:
+        dice_pool = DicePool(dice)
+    except Exception as e:
+        # send error message
+        await ctx.respond(f"Error: {e}, Invalid Dice String")
+        return
+    dice_pool.roll()
+
+    # create histogram
+    h_total = None
+    c_list = []
+    for item in dice_pool.look():
+        if isinstance(item, dict):
+            h_total = h_total + (item['quantity'])@H(item['sides']) if h_total is not None else (item['quantity'])@H(item['sides'])
+        else:
+            c_list.append(item)
+
+    if h_total is not None:
+        for item in c_list:
+            h_total = h_total + item
+    
+    # create response string
+    if h_total is None:
+        # send error message cause there were no dice.
+        await ctx.respond(f"Error: No dice in dice string", hikari.MessageFlag.EPHEMERAL)
+        return
+
+    # create response string
+    response = f"Histogram of {dice}\n"
+    response += f"```\n{h_total.format()}\n```"
+    # send response
+
+    # check if response is too long
+    if len(response) > 2000:
+        # create file
+        filename = f"{uuid.uuid4()}_response.txt"
+        with open(filename, 'w') as wf:
+            wf.write(response)
+        
+        # create response
+        response = f"Histogram of {dice} is too long. See text file for histogram."
+        file = hikari.File(filename)
+        await ctx.respond(response, attachment=file)
+        os.remove(filename)
+        return
+
+    await ctx.respond(response)
 
 
 def load(bot: lightbulb.BotApp) -> None:
@@ -212,12 +296,14 @@ def load(bot: lightbulb.BotApp) -> None:
     bot.command(r20)
     bot.command(flip)
     bot.command(create_label)
+    bot.command(histogram)
 
 def unload(bot: lightbulb.BotApp) -> None:
     bot.remove_command(bot.get_slash_command("dice"))
     bot.remove_command(bot.get_slash_command("r20"))
     bot.remove_command(bot.get_slash_command("flip"))
     bot.remove_command(bot.get_slash_command("create_label"))
+    bot.remove_command(bot.get_slash_command("histogram"))
 
 
 

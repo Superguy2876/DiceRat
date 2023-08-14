@@ -5,7 +5,7 @@ import hikari
 import os
 from lightbulb import commands
 import redis
-import dyce
+from dyce import H
 from ..dice import DicePool, Dice
 
 
@@ -33,6 +33,7 @@ async def testfile(ctx: lightbulb.context.Context) -> None:
 
     # delete file
     os.remove("test.txt")
+
 
 def load(bot: lightbulb.BotApp) -> None:
     bot.command(test)
