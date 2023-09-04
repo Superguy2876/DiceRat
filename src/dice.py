@@ -133,6 +133,18 @@ class DicePool:
 
     def __str__(self):
         return ' + '.join(str(item) for item in self.dice_constants)
+    
+    def __iter__(self):
+        self._index = 0
+        return self
+
+    def __next__(self):
+        if self._index < len(self.dice_constants):
+            result = self.dice_constants[self._index]
+            self._index += 1
+            return result
+        else:
+            raise StopIteration
 
 
 # Testing the function

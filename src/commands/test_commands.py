@@ -17,6 +17,14 @@ async def test(ctx: lightbulb.context.Context) -> None:
     await ctx.respond("test")
 
 
+@lightbulb.command("valuetest", "test command")
+@lightbulb.implements(commands.SlashCommand)
+async def valuetest(ctx: lightbulb.context.Context) -> None:
+    # we get some dice and roll them all, counting the outcomes, all dice will be d20s
+    dice = DicePool('1000d20')
+    
+
+
 # command to test attaching a txt file to a message
 @lightbulb.command("testfile", "test command")
 @lightbulb.implements(commands.SlashCommand)
