@@ -33,3 +33,10 @@ tests
 
 # Ignore all markdown files
 *.md
+
+# ignore key and public key
+*.key
+*.pub
+
+# ignore powershell files
+*.ps1
