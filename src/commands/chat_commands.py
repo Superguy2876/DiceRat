@@ -15,7 +15,7 @@ def send_and_receive(client, messages):
         messages=messages
     )
 
-@lightbulb.option("Choice", "Choose your object.", str, required=True)
+@lightbulb.option("choice", "Choose your object.", str, required=True)
 @lightbulb.command("spr", "Enter a Custom Scissors, Paper, Rock Game.")
 @lightbulb.implements(commands.SlashCommand)
 async def scissors_paper_rock(ctx: lightbulb.context.Context) -> None:
