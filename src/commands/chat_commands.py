@@ -1,4 +1,6 @@
 import random
+import os
+import uuid
 from urllib import response
 import lightbulb
 import hikari
@@ -93,10 +95,23 @@ async def scissors_paper_rock(ctx: lightbulb.context.Context) -> None:
     """
     user_message = {'role':'user'}
 
-    user_message['content'] = f"player1: {players[0]}\nplayer2: {players[1]}"
+    user_message['content'] = f"player 1: {players[0]}\nplayer 2: {players[1]}"
     messages = [system_message, user_message] 
     completion = send_and_receive(client, messages)
     response = completion.choices[0].message.content
+
+    if len(response) > 2000:
+        # create txt file and put response in it
+        filename = f"{uuid.uuid4()}_response.txt"
+        with open(filename, 'w') as wf:
+            wf.write(response)
+        
+        # create new response, attach file to it, and send
+        response = f"Response body too long. See text file for response."
+        file = hikari.File(filename)
+        await ctx.edit_last_response(response, attachment=file)
+        os.remove(filename)
+        return
 
     # Edit the message with the response.
     await ctx.edit_last_response(response)
