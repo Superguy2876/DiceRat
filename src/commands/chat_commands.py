@@ -17,6 +17,7 @@ def send_and_receive(client, messages):
 
 @lightbulb.option("password", "The password to use.", str, required=True)
 @lightbulb.command("toggle_spr", "Activate the Custom Scissors, Paper, Rock Game.")
+@lightbulb.implements(commands.SlashCommand)
 async def toggle_spr(ctx: lightbulb.context.Context) -> None:
     password = ctx.options.password
 
