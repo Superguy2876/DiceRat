@@ -16,7 +16,7 @@ def send_and_receive(client, messages):
     )
 
 @lightbulb.option("Choice", "Choose your object.", str, required=True)
-@lightbulb.command("SPR", "Enter a Custom Scissors, Paper, Rock Game.")
+@lightbulb.command("spr", "Enter a Custom Scissors, Paper, Rock Game.")
 @lightbulb.implements(commands.SlashCommand)
 async def scissors_paper_rock(ctx: lightbulb.context.Context) -> None:
     user_choice = ctx.options.choice.lower()
@@ -72,4 +72,4 @@ def load(bot: lightbulb.BotApp) -> None:
     bot.command(scissors_paper_rock)
 
 def unload(bot: lightbulb.BotApp) -> None:
-    bot.remove_command(bot.get_slash_command("SPR"))
+    bot.remove_command(bot.get_slash_command("spr"))
