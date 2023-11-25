@@ -103,7 +103,9 @@ async def scissors_paper_rock(ctx: lightbulb.context.Context) -> None:
     
 
 def load(bot: lightbulb.BotApp) -> None:
+    bot.command(toggle_spr)
     bot.command(scissors_paper_rock)
 
 def unload(bot: lightbulb.BotApp) -> None:
+    bot.remove_command(bot.get_slash_command("toggle_spr"))
     bot.remove_command(bot.get_slash_command("spr"))
