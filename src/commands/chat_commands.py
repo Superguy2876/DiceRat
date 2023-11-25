@@ -21,7 +21,7 @@ def send_and_receive(client, messages):
 async def scissors_paper_rock(ctx: lightbulb.context.Context) -> None:
     user_choice = ctx.options.choice.lower()
 
-    guild_id = ctx.get_guild().id
+    guild_id = ctx.guild_id
     key = f"{guild_id}:SPR"
 
     r = redis.Redis(connection_pool=ctx.bot.redis_pool)
