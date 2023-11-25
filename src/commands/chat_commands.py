@@ -63,7 +63,7 @@ async def SPR(ctx: lightbulb.context.Context) -> None:
     response = completion.choices[0].message.content
 
     # Edit the message with the response.
-    await ctx.edit_response(response)
+    await ctx.edit_last_response(response)
     
     # You may want to clear the key after the game is done.
     r.delete(key)

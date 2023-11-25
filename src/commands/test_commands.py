@@ -47,7 +47,7 @@ async def testfile(ctx: lightbulb.context.Context) -> None:
 
 @lightbulb.command("test_wait", "test command")
 @lightbulb.implements(commands.SlashCommand)
-async def test(ctx: lightbulb.context.Context) -> None:
+async def test_wait(ctx: lightbulb.context.Context) -> None:
     # Send initial response
     initial_response = await ctx.respond("Beginning test")
 
@@ -60,8 +60,10 @@ async def test(ctx: lightbulb.context.Context) -> None:
 
 def load(bot: lightbulb.BotApp) -> None:
     bot.command(test)
+    bot.command(test_wait)
     bot.command(testfile)
 
 def unload(bot: lightbulb.BotApp) -> None:
     bot.remove_command(bot.get_slash_command("test"))
+    bot.remove_command(bot.get_slash_command("test_wait"))
     bot.remove_command(bot.get_slash_command("testfile"))
