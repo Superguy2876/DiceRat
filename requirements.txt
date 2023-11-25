@@ -3,4 +3,5 @@ hikari-lightbulb
 python-dotenv
 redis
 anydyce
+openai
 uvloop; sys_platform != "win32"

@@ -7,6 +7,7 @@ from lightbulb import commands
 import redis
 from dyce import H
 from ..dice import DicePool, Dice
+import asyncio
 
 
 
@@ -41,6 +42,20 @@ async def testfile(ctx: lightbulb.context.Context) -> None:
 
     # delete file
     os.remove("test.txt")
+
+
+
+@lightbulb.command("test_wait", "test command")
+@lightbulb.implements(commands.SlashCommand)
+async def test(ctx: lightbulb.context.Context) -> None:
+    # Send initial response
+    initial_response = await ctx.respond("Beginning test")
+
+    # Wait for 5 seconds
+    await asyncio.sleep(5)
+
+    # Edit the message
+    await ctx.edit_last_response("Finished test")
 
 
 def load(bot: lightbulb.BotApp) -> None:
