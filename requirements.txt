@@ -1,7 +1,9 @@
-hikari
+hikari[speedups]
 hikari-lightbulb
 python-dotenv
 redis
 anydyce
 openai
+fastapi
+uvicorn[standard]
 uvloop; sys_platform != "win32"

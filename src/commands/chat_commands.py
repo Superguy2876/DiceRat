@@ -8,7 +8,10 @@ from lightbulb import commands
 import redis
 from openai import OpenAI
 from dotenv import load_dotenv, dotenv_values
+import json
 load_dotenv()
+
+
 
 
 def send_and_receive(client, messages):
@@ -16,6 +19,16 @@ def send_and_receive(client, messages):
         model="gpt-4-1106-preview",
         messages=messages
     )
+
+# get adjudicators from redis
+# key format: gods:<name>
+def get_adjudicators():
+    r =  redis.Redis(host='redis', port=6379, db=0, decode_responses=True)
+    adjudicators = [name.split(':')[1] for name in r.scan_iter("gods:*")]
+    # close connection
+    r.close()
+    return adjudicators
+    
 
 @lightbulb.option("password", "The password to use.", str, required=True)
 @lightbulb.command("toggle_spr", "Activate the Custom Scissors, Paper, Rock Game.")
@@ -42,7 +55,8 @@ async def toggle_spr(ctx: lightbulb.context.Context) -> None:
 
     await ctx.respond("SPR deactivated!", flags=hikari.MessageFlag.EPHEMERAL)
 
-@lightbulb.option("choice", "Choose your object.", str, required=True)
+@lightbulb.option("choice", "Choose your object.", str, required=True, choices=get_adjudicators())
+@lightbulb.option("adjudicator", "Choose your adjudicator.", str, required=True)
 @lightbulb.command("spr", "Enter a Custom Scissors, Paper, Rock Game.")
 @lightbulb.implements(commands.SlashCommand)
 async def scissors_paper_rock(ctx: lightbulb.context.Context) -> None:
@@ -56,6 +70,16 @@ async def scissors_paper_rock(ctx: lightbulb.context.Context) -> None:
         return
 
     user_choice = ctx.options.choice.lower()
+    adjudicator_name = ctx.options.adjudicator.lower()
+
+    # Load the list of adjudicators from Redis
+    adjudicators = [name.split(':')[1] for name in r.scan_iter("gods:*")]
+
+    # Find the selected adjudicator
+    adjudicator = adjudicators.get(adjudicator_name)
+    if adjudicator is None:
+        await ctx.respond(f"No adjudicator found with the name {adjudicator_name}.", flags=hikari.MessageFlag.EPHEMERAL)
+        return
 
     guild_id = ctx.guild_id
     key = f"{guild_id}:SPR"
@@ -82,20 +106,15 @@ async def scissors_paper_rock(ctx: lightbulb.context.Context) -> None:
     client = OpenAI()
 
     system_message = {'role':'system'}
-    system_message['content'] = """You are a god of chaos. 
-    You are Sarcastic, humorous, and a bit of a trickster. 
-    You are called to adjudicate a game of Scissors, Paper, Rock between two players.
-    The catch being that the players can choose ANYTHING as their object.
-    Decide who wins the game. A describe why and how they won in a humours manner.
-    Use the following format:
+    formatting = """\nUse the following format:
     Player 1: <object>
     Player 2: <object>
     Winner: <player>
-    Reason: <reason>
-    """
+    Reason: <reason>"""
+    system_message['content'] = adjudicator + formatting
     user_message = {'role':'user'}
 
-    user_message['content'] = f"player 1: {players[0]}\nplayer 2: {players[1]}"
+    user_message['content'] = f"player 1's choice is {players[0]}\nplayer 2's choice is {players[1]}"
     messages = [system_message, user_message] 
     completion = send_and_receive(client, messages)
     response = completion.choices[0].message.content
@@ -121,6 +140,14 @@ async def scissors_paper_rock(ctx: lightbulb.context.Context) -> None:
 def load(bot: lightbulb.BotApp) -> None:
     bot.command(toggle_spr)
     bot.command(scissors_paper_rock)
+
+    # load gods into redis
+    r = redis.Redis(connection_pool=bot.redis_pool)
+    with open('gods.json') as f:
+        gods = json.load(f)
+        for god in gods:
+            # key format: god:<name>
+            r.set(f"god:{god['name']}", god['description'])
 
 def unload(bot: lightbulb.BotApp) -> None:
     bot.remove_command(bot.get_slash_command("toggle_spr"))

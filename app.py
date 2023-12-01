@@ -19,6 +19,7 @@ def create_bot() -> lightbulb.BotApp:
 
     pool = redis.ConnectionPool(host='redis', port=6379, db=0, decode_responses=True)
     
+
     print(GUILD_IDs)
     # Create the main bot instance with all intents.
     bot = RatBotApp(
