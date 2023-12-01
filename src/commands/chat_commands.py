@@ -76,13 +76,12 @@ async def scissors_paper_rock(ctx: lightbulb.context.Context) -> None:
     adjudicators = [name.split(':')[1] for name in r.scan_iter("gods:*")]
 
     # Find the selected adjudicator
-    adjudicator = adjudicators.get(adjudicator_name)
-    if adjudicator is None:
+    if adjudicator_name not in adjudicators:
         await ctx.respond(f"No adjudicator found with the name {adjudicator_name}.", flags=hikari.MessageFlag.EPHEMERAL)
         return
 
     guild_id = ctx.guild_id
-    key = f"{guild_id}:SPR"
+    key = f"{guild_id}:SPR:{adjudicator}"
 
     r = redis.Redis(connection_pool=ctx.bot.redis_pool)
 
