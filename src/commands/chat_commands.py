@@ -33,11 +33,9 @@ def get_adjudicators(redis_pool):
     r = redis.Redis(connection_pool=redis_pool)
     # get name keys then get description values, return both as a list of tuples
     adjudicators = [(name.split(':')[1], r.get(name)) for name in r.scan_iter("god:*")]
-    # get descriptons from redis, using god:<name> as key
-    descriptions = [r.get(f"god:{name}") for name in adjudicators]
     # close connection
     r.close()
-    return zip(adjudicators, descriptions)
+    return adjudicators
 
     
     
@@ -67,8 +65,8 @@ async def toggle_spr(ctx: lightbulb.context.Context) -> None:
 
     await ctx.respond("SPR deactivated!", flags=hikari.MessageFlag.EPHEMERAL)
 
-@lightbulb.option("choice", "Choose your object.", str, required=True, choices=get_adjudicators())
-@lightbulb.option("adjudicator", "Choose your adjudicator.", str, required=True)
+@lightbulb.option("choice", "Choose your object.", str, required=True)
+@lightbulb.option("adjudicator", "Choose your adjudicator.", int, required=True)
 @lightbulb.command("spr", "Enter a Custom Scissors, Paper, Rock Game.")
 @lightbulb.implements(commands.SlashCommand)
 async def scissors_paper_rock(ctx: lightbulb.context.Context) -> None:
@@ -82,15 +80,16 @@ async def scissors_paper_rock(ctx: lightbulb.context.Context) -> None:
         return
 
     user_choice = ctx.options.choice.lower()
-    adjudicator_name = ctx.options.adjudicator.lower()
+    adjudicator_index = int(ctx.options.adjudicator) - 1
 
     # Load the list of adjudicators from Redis
-    adjudicators = [name.split(':')[1] for name in r.scan_iter("gods:*")]
+    adjudicators = get_adjudicators(ctx.bot.redis_pool)
 
-    # Find the selected adjudicator
-    if adjudicator_name not in adjudicators:
-        await ctx.respond(f"No adjudicator found with the name {adjudicator_name}.", flags=hikari.MessageFlag.EPHEMERAL)
+    if adjudicator_index < 0 or adjudicator_index >= len(adjudicators):
+        await ctx.respond(f"No adjudicator found with the number {adjudicator_index + 1}.", flags=hikari.MessageFlag.EPHEMERAL)
         return
+
+    adjudicator_name = adjudicators[adjudicator_index][0]
 
     guild_id = ctx.guild_id
     key = f"{guild_id}:SPR:{adjudicator_name}"
@@ -147,19 +146,19 @@ async def scissors_paper_rock(ctx: lightbulb.context.Context) -> None:
     # Edit the message with the response.
     await ctx.edit_last_response(response)
     
-@lightbulb.command("adjudicators", "Enter a Custom Scissors, Paper, Rock Game.")
+@lightbulb.command("adjudicators", "List possible Adjudicators of SPR.", ephemeral=True)
 @lightbulb.implements(commands.SlashCommand)
 async def adjudicators(ctx: lightbulb.context.Context) -> None:
     r = redis.Redis(connection_pool=ctx.bot.redis_pool)
     
-
     adjudicators = get_adjudicators(ctx.bot.redis_pool)
 
-    await ctx.respond('\n'.join([f"{adjudicator[0]}: {adjudicator[1]}" for adjudicator in adjudicators]))
+    await ctx.respond('\n\n'.join([f"{i+1}: {adjudicator[0]}: {adjudicator[1]}" for i, adjudicator in enumerate(adjudicators)]))
 
 def load(bot: lightbulb.BotApp) -> None:
     bot.command(toggle_spr)
     bot.command(scissors_paper_rock)
+    bot.command(adjudicators)
 
     # load gods into redis
     r = redis.Redis(connection_pool=bot.redis_pool)
@@ -174,3 +173,4 @@ def load(bot: lightbulb.BotApp) -> None:
 def unload(bot: lightbulb.BotApp) -> None:
     bot.remove_command(bot.get_slash_command("toggle_spr"))
     bot.remove_command(bot.get_slash_command("spr"))
+    bot.remove_command(bot.get_slash_command("adjudicators"))

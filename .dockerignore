@@ -1,3 +1,5 @@
+compose-dev.yaml
+
 # .dockerignore
 
 # Ignore the virtual environment directory
