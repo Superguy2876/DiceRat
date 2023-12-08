@@ -28,6 +28,18 @@ def get_adjudicators():
     # close connection
     r.close()
     return adjudicators
+
+def get_adjudicators(redis_pool):
+    r = redis.Redis(connection_pool=redis_pool)
+    # get name keys then get description values, return both as a list of tuples
+    adjudicators = [(name.split(':')[1], r.get(name)) for name in r.scan_iter("god:*")]
+    # get descriptons from redis, using god:<name> as key
+    descriptions = [r.get(f"god:{name}") for name in adjudicators]
+    # close connection
+    r.close()
+    return zip(adjudicators, descriptions)
+
+    
     
 
 @lightbulb.option("password", "The password to use.", str, required=True)
@@ -81,7 +93,7 @@ async def scissors_paper_rock(ctx: lightbulb.context.Context) -> None:
         return
 
     guild_id = ctx.guild_id
-    key = f"{guild_id}:SPR:{adjudicator}"
+    key = f"{guild_id}:SPR:{adjudicator_name}"
 
     r = redis.Redis(connection_pool=ctx.bot.redis_pool)
 
@@ -110,7 +122,8 @@ async def scissors_paper_rock(ctx: lightbulb.context.Context) -> None:
     Player 2: <object>
     Winner: <player>
     Reason: <reason>"""
-    system_message['content'] = adjudicator + formatting
+    # get adjudicator description from redis
+    system_message['content'] = r.get(f"god:{adjudicator_name}") + formatting
     user_message = {'role':'user'}
 
     user_message['content'] = f"player 1's choice is {players[0]}\nplayer 2's choice is {players[1]}"
@@ -134,7 +147,15 @@ async def scissors_paper_rock(ctx: lightbulb.context.Context) -> None:
     # Edit the message with the response.
     await ctx.edit_last_response(response)
     
+@lightbulb.command("adjudicators", "Enter a Custom Scissors, Paper, Rock Game.")
+@lightbulb.implements(commands.SlashCommand)
+async def adjudicators(ctx: lightbulb.context.Context) -> None:
+    r = redis.Redis(connection_pool=ctx.bot.redis_pool)
     
+
+    adjudicators = get_adjudicators(ctx.bot.redis_pool)
+
+    await ctx.respond('\n'.join([f"{adjudicator[0]}: {adjudicator[1]}" for adjudicator in adjudicators]))
 
 def load(bot: lightbulb.BotApp) -> None:
     bot.command(toggle_spr)
@@ -142,7 +163,9 @@ def load(bot: lightbulb.BotApp) -> None:
 
     # load gods into redis
     r = redis.Redis(connection_pool=bot.redis_pool)
-    with open('gods.json') as f:
+    # print working directory
+    print(os.getcwd())
+    with open('data/json/gods.json') as f:
         gods = json.load(f)
         for god in gods:
             # key format: god:<name>

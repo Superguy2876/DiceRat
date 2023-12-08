@@ -26,10 +26,13 @@ data
 # Ignore test directories
 tests
 
-# Ignore configuration files
+# Ignore configuration files 
 *.cfg
 *.ini
 *.json
+# Except for the configuration files in data folder
+!data/json/*.json
+
 
 # Ignore all markdown files
 *.md
