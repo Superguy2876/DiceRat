@@ -6,6 +6,7 @@ from lightbulb import commands
 import redis
 import dyce
 from ..dice import DicePool, Dice
+import uuid
 
 # deck of many things bot function
 @lightbulb.option("number", "The number of cards to pull.", int, default=1)
