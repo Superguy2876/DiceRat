@@ -16,7 +16,7 @@ load_dotenv()
 
 def send_and_receive(client, messages):
     return client.chat.completions.create(
-        model="gpt-4-1106-preview",
+         model="gpt-4-1106-preview",
         messages=messages
     )
 
@@ -152,7 +152,7 @@ async def adjudicators(ctx: lightbulb.context.Context) -> None:
     r = redis.Redis(connection_pool=ctx.bot.redis_pool)
     
     adjudicators = get_adjudicators(ctx.bot.redis_pool)
-
+ 
     await ctx.respond('\n\n'.join([f"{i+1}: {adjudicator[0]}: {adjudicator[1]}" for i, adjudicator in enumerate(adjudicators)]))
 
 def load(bot: lightbulb.BotApp) -> None:

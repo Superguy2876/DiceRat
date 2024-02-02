@@ -7,7 +7,8 @@ from lightbulb import commands
 import redis
 from dyce import H
 from ..dice import DicePool, Dice
-import uuid
+
+
 
 
 
