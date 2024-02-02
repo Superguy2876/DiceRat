@@ -300,11 +300,11 @@ async def draw_cards(ctx: lightbulb.context.Context):
         # create new response, attach file to it, and send
         response = "Deck list too long. See text file for full list."
         file = hikari.File(filename)
-        await ctx.respond(response, attachment=file, flags=hikari.MessageFlag.EPHEMERAL if ctx.options.ephemeral else None)
+        await ctx.respond(response, attachment=file)
         os.remove(filename)
         return
 
-    await ctx.respond(response, flags=hikari.MessageFlag.EPHEMERAL if ctx.options.ephemeral else None)
+    await ctx.respond(response)
 
     
 @lightbulb.option("include_cards", "Whether to include the associated list of cards.", bool, default=False)
