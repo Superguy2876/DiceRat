@@ -289,7 +289,7 @@ async def draw_cards(ctx: lightbulb.context.Context):
 
     await ctx.respond(response)
 @lightbulb.option("include_cards", "Whether to include the associated list of cards.", bool, default=False)
-@lightbulb.command("list_decks", "Lists the names of each deck.")
+@lightbulb.command("list_decks", "Lists the names of each deck.", ephemeral=True)
 @lightbulb.implements(commands.SlashCommand)
 async def list_decks(ctx: lightbulb.context.Context):
     include_cards = ctx.options.include_cards
@@ -336,10 +336,12 @@ async def list_decks(ctx: lightbulb.context.Context):
 
 # list guild decks
 @lightbulb.option("include_cards", "Whether to include the associated list of cards.", bool, default=False)
+@lightbulb.option("ephemeral", "Whether the response should be ephemeral.", bool, default=True)
 @lightbulb.command("list_guild_decks", "Lists the names of each deck for the whole guild.")
 @lightbulb.implements(commands.SlashCommand)
 async def list_guild_decks(ctx: lightbulb.context.Context):
     include_cards = ctx.options.include_cards
+    ephemeral = ctx.options.ephemeral
 
     # get redis
     rpool = ctx.bot.redis_pool
@@ -363,7 +365,7 @@ async def list_guild_decks(ctx: lightbulb.context.Context):
             response += f" ({card_list})"
         response += "\n"
     
-    # check response lenth, if over 2000 characters, make into a text file
+    # check response length, if over 2000 characters, make into a text file
     if len(response) > 2000:
         # create txt file and put response in it
         filename = f"{uuid.uuid4()}_decks.txt"
@@ -373,11 +375,11 @@ async def list_guild_decks(ctx: lightbulb.context.Context):
         # create new response, attach file to it, and send
         response = "Deck list too long. See text file for full list."
         file = hikari.File(filename)
-        await ctx.respond(response, attachment=file)
+        await ctx.respond(response, attachment=file, flags=hikari.MessageFlag.EPHEMERAL if ephemeral else None)
         os.remove(filename)
         return
 
-    await ctx.respond(response)
+    await ctx.respond(response, flags=hikari.MessageFlag.EPHEMERAL if ephemeral else None)
 
 # Pulls a number cards from a deck of cards
 def pullCards(deck, number):
