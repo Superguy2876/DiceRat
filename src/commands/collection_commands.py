@@ -7,6 +7,7 @@ import redis
 import dyce
 from ..dice import DicePool, Dice
 import uuid
+import os
 
 # deck of many things bot function
 @lightbulb.option("number", "The number of cards to pull.", int, default=1)
@@ -241,11 +242,6 @@ async def create_guild_deck(ctx: lightbulb.context.Context):
     # respond
     await ctx.respond(f"Deck {name} created for the whole guild.\n{deck_exists_message}")
 
-@lightbulb.option("name", "The name of the deck to draw from. Ignores card list if specified.", default=None)
-@lightbulb.option("number", "The number of cards to draw.", int, default=1)
-@lightbulb.option("card_list", "The list of cards to draw from. Seperated by a comma (,)", default=None)
-@lightbulb.command("draw_cards", "Draws a number of cards from a deck.")
-@lightbulb.implements(commands.SlashCommand)
 async def draw_cards(ctx: lightbulb.context.Context):
     number = ctx.options.number
     card_string = ctx.options.card_list
@@ -284,10 +280,28 @@ async def draw_cards(ctx: lightbulb.context.Context):
         return
 
     new_line = "\n"
-    response = f"Pulling {number} cards.\n"
+    response = f"Pulling {number} cards from {name if name else 'the following deck'}:\n"
+    response += f"{name if name else ', '.join(card_list)}\n"
+    response += f"Draws:\n"
     response += f"{new_line.join(cards)}"
 
-    await ctx.respond(response)
+    # check response length, if over 2000 characters, make into a text file
+    if len(response) > 2000:
+        # create txt file and put response in it
+        filename = f"{uuid.uuid4()}_draws.txt"
+        with open(filename, 'w') as wf:
+            wf.write(response)
+        
+        # create new response, attach file to it, and send
+        response = "Deck list too long. See text file for full list."
+        file = hikari.File(filename)
+        await ctx.respond(response, attachment=file, flags=hikari.MessageFlag.EPHEMERAL if ctx.options.ephemeral else None)
+        os.remove(filename)
+        return
+
+    await ctx.respond(response, flags=hikari.MessageFlag.EPHEMERAL if ctx.options.ephemeral else None)
+
+
 @lightbulb.option("include_cards", "Whether to include the associated list of cards.", bool, default=False)
 @lightbulb.command("list_decks", "Lists the names of each deck.", ephemeral=True)
 @lightbulb.implements(commands.SlashCommand)
