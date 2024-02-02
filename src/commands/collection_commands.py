@@ -242,6 +242,11 @@ async def create_guild_deck(ctx: lightbulb.context.Context):
     # respond
     await ctx.respond(f"Deck {name} created for the whole guild.\n{deck_exists_message}")
 
+@lightbulb.option("name", "The name of the deck to draw from. Ignores card list if specified.", default=None)
+@lightbulb.option("number", "The number of cards to draw.", int, default=1)
+@lightbulb.option("card_list", "The list of cards to draw from. Seperated by a comma (,)", default=None)
+@lightbulb.command("draw_cards", "Draws a number of cards from a deck.")
+@lightbulb.implements(commands.SlashCommand)
 async def draw_cards(ctx: lightbulb.context.Context):
     number = ctx.options.number
     card_string = ctx.options.card_list
@@ -301,7 +306,7 @@ async def draw_cards(ctx: lightbulb.context.Context):
 
     await ctx.respond(response, flags=hikari.MessageFlag.EPHEMERAL if ctx.options.ephemeral else None)
 
-
+    
 @lightbulb.option("include_cards", "Whether to include the associated list of cards.", bool, default=False)
 @lightbulb.command("list_decks", "Lists the names of each deck.", ephemeral=True)
 @lightbulb.implements(commands.SlashCommand)
